@@ -175,7 +175,7 @@ class DatabaseSeeder extends Seeder
 
         Post::create([
             'community_id' => 1,
-            'author_id' => 7,
+            'author_id' => 1,
             'title' => 'Why I switched from microservices back to a monolith',
             'body' => 'After 3 years of running a microservices architecture at scale, we made the controversial decision to consolidate back into a modular monolith.',
             'type' => 'text',

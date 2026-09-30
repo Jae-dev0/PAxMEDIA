@@ -7,6 +7,11 @@ COPY package.json package-lock.json* ./
 RUN npm ci || npm install
 
 COPY . .
+
+# Vite inlines VITE_API_URL at build time, so it must be a build arg rather
+# than a runtime environment variable.
+ARG VITE_API_URL=http://localhost:8000/api
+ENV VITE_API_URL=${VITE_API_URL}
 RUN npm run build
 
 # ─── Stage 2: Development server ──────────────────────────────────────────────

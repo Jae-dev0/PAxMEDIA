@@ -17,35 +17,44 @@ use App\Http\Controllers\Api\ModerationController;
 |--------------------------------------------------------------------------
 */
 
-// Public routes
+// ─── Public (guest browsing) ────────────────────────────────────────────────
+// Logged-out visitors can read all content; only writes require auth.
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 
-// Protected routes
+// Users
+Route::get('/users', [UserController::class, 'index']);
+Route::get('/users/{username}', [UserController::class, 'show']);
+Route::get('/users/{id}/posts', [UserController::class, 'posts']);
+Route::get('/users/{id}/comments', [UserController::class, 'comments']);
+
+// Communities
+Route::get('/communities', [CommunityController::class, 'index']);
+Route::get('/communities/{slug}', [CommunityController::class, 'show']);
+Route::get('/communities/{id}/posts', [CommunityController::class, 'posts']);
+
+// Posts
+Route::get('/posts', [PostController::class, 'index']);
+Route::get('/posts/{id}', [PostController::class, 'show']);
+Route::get('/posts/{postId}/comments', [CommentController::class, 'index']);
+
+// Search
+Route::get('/search', [SearchController::class, 'search']);
+
+// ─── Authenticated ──────────────────────────────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
     // Auth
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
-
-    // Users
-    Route::get('/users', [UserController::class, 'index']);
-    Route::get('/users/{username}', [UserController::class, 'show']);
     Route::put('/users/me', [UserController::class, 'update']);
     Route::post('/users/{id}/follow', [UserController::class, 'follow']);
-    Route::get('/users/{id}/posts', [UserController::class, 'posts']);
-    Route::get('/users/{id}/comments', [UserController::class, 'comments']);
 
     // Communities
-    Route::get('/communities', [CommunityController::class, 'index']);
-    Route::get('/communities/{slug}', [CommunityController::class, 'show']);
     Route::post('/communities', [CommunityController::class, 'store']);
     Route::post('/communities/{id}/join', [CommunityController::class, 'join']);
     Route::post('/communities/{id}/follow', [CommunityController::class, 'follow']);
-    Route::get('/communities/{id}/posts', [CommunityController::class, 'posts']);
 
     // Posts
-    Route::get('/posts', [PostController::class, 'index']);
-    Route::get('/posts/{id}', [PostController::class, 'show']);
     Route::post('/posts', [PostController::class, 'store']);
     Route::put('/posts/{id}', [PostController::class, 'update']);
     Route::delete('/posts/{id}', [PostController::class, 'destroy']);
@@ -55,7 +64,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/posts/{id}/hide', [PostController::class, 'hide']);
 
     // Comments
-    Route::get('/posts/{postId}/comments', [CommentController::class, 'index']);
     Route::post('/posts/{postId}/comments', [CommentController::class, 'store']);
     Route::put('/comments/{id}', [CommentController::class, 'update']);
     Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
@@ -74,9 +82,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/conversations/{id}/messages', [MessageController::class, 'messages']);
     Route::post('/conversations/{id}/messages', [MessageController::class, 'sendMessage']);
     Route::post('/conversations/{id}/read', [MessageController::class, 'markAsRead']);
-
-    // Search
-    Route::get('/search', [SearchController::class, 'search']);
 
     // Moderation
     Route::get('/moderation/reports', [ModerationController::class, 'reports']);

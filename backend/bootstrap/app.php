@@ -16,10 +16,20 @@ return Application::configure(basePath: dirname(__DIR__))
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
+        // This is an API-only app with no HTML login page. Returning null makes
+        // the auth middleware emit a 401 JSON response instead of trying to
+        // redirect to a non-existent 'login' route.
+        $middleware->redirectGuestsTo(fn () => null);
+
         $middleware->alias([
             'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Always answer API requests with JSON, even without an Accept header.
+        // Without this, a 401 tries to render/redirect to a non-existent
+        // 'login' route and surfaces as a misleading 500.
+        $exceptions->shouldRenderJsonWhen(
+            fn ($request) => $request->is('api/*') || $request->expectsJson()
+        );
     })->create();

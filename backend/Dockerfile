@@ -42,6 +42,10 @@ COPY docker/nginx/default.conf /etc/nginx/http.d/default.conf
 # Configure Supervisor
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Entrypoint (waits for DB, migrates, then starts php-fpm + nginx)
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 # Create required directories
 RUN mkdir -p /var/log/supervisor /var/log/php /var/log/nginx /var/run
 
@@ -51,7 +55,12 @@ WORKDIR /var/www/html
 COPY . .
 
 # Install dependencies
-RUN composer install --no-dev --no-scripts --prefer-dist --ignore-platform-reqs || true
+ENV COMPOSER_ALLOW_SUPERUSER=1
+RUN composer install --no-dev --no-scripts --prefer-dist --ignore-platform-reqs \
+    || composer update --no-dev --no-scripts --prefer-dist --ignore-platform-reqs
+
+# Fail the build if vendor/ is missing or incomplete, so a broken image can never ship
+RUN test -f vendor/autoload.php || (echo "FATAL: vendor/ missing" && exit 1)
 
 # Set permissions
 RUN chown -R www-data:www-data \
@@ -63,4 +72,5 @@ RUN chown -R www-data:www-data \
 
 EXPOSE 80
 
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
