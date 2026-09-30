@@ -7,17 +7,16 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
       args:
-        VITE_API_URL: http://localhost:8000/api
+        # Vite inlines VITE_* at build time, so it must be a build arg.
+        # Sourced from the root .env.
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000/api}
     container_name: paxmedia-frontend
     restart: unless-stopped
     ports:
       # The frontend image serves the built app via nginx on port 80.
       - "5173:80"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - VITE_API_URL=http://localhost:8000/api
+    env_file:
+      - .env
     networks:
       - paxmedia
     depends_on:
@@ -35,21 +34,11 @@ services:
     # NOTE: no bind mount on /var/www/html. A bind mount shadows the image,
     # which would hide vendor/ (installed at build time) and break Laravel.
     # Code changes require `docker compose build backend`.
-    environment:
-      - APP_ENV=local
-      - APP_DEBUG=true
-      - APP_KEY=${APP_KEY:-}
-      - DB_CONNECTION=pgsql
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_DATABASE=paxmedia
-      - DB_USERNAME=paxmedia
-      - DB_PASSWORD=paxmedia_secret
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - CACHE_DRIVER=redis
-      - SESSION_DRIVER=redis
-      - QUEUE_CONNECTION=redis
+    #
+    # All configuration comes from the root .env, which is the single source of
+    # truth. There is intentionally no backend/.env.
+    env_file:
+      - .env
     networks:
       - paxmedia
     depends_on:
@@ -68,13 +57,13 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: paxmedia
-      POSTGRES_USER: paxmedia
-      POSTGRES_PASSWORD: paxmedia_secret
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     networks:
       - paxmedia
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U paxmedia -d paxmedia"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5

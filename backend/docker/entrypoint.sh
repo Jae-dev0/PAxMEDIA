@@ -6,7 +6,29 @@ set -e
 
 echo "==> PAxMEDIA Backend Entrypoint"
 
-# ── Wait for database ────────────────────────────────────────────────────────
+# --- Validate external configuration -----------------------------------------
+# This container has no .env of its own on purpose: every value arrives from
+# the root .env via `env_file` in docker-compose.yml. Fail loudly and early if
+# that file is missing or incomplete, instead of booting with Laravel's
+# defaults (which would silently point at the wrong database).
+echo "==> Validating environment..."
+MISSING=""
+for VAR in APP_KEY APP_ENV DB_CONNECTION DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD; do
+    eval "VALUE=\${$VAR:-}"
+    if [ -z "$VALUE" ]; then
+        MISSING="$MISSING $VAR"
+    fi
+done
+if [ -n "$MISSING" ]; then
+    echo "    ERROR: missing required environment variable(s):$MISSING"
+    echo "    The backend takes all config from the root .env via env_file."
+    echo "    Fix: copy .env.example to .env, fill in the values, then:"
+    echo "         docker compose up -d --build"
+    exit 1
+fi
+echo "    Environment OK (APP_KEY set, database configured)."
+
+# --- Wait for database -------------------------------------------------------
 echo "==> Waiting for database..."
 ATTEMPTS=0
 until php -r 'try { new PDO("pgsql:host=".getenv("DB_HOST").";port=".getenv("DB_PORT").";dbname=".getenv("DB_DATABASE"), getenv("DB_USERNAME"), getenv("DB_PASSWORD")); exit(0); } catch (Throwable $e) { exit(1); }'; do
