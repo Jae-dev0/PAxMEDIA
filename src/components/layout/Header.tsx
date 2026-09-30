@@ -144,7 +144,7 @@ export default function Header({ onOpenAuth }: HeaderProps) {
                 Sign In
               </Button>
               <Button variant="primary" size="sm" onClick={onOpenAuth}>
-                Open Account
+                Sign Up
               </Button>
             </div>
           )}
