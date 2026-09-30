@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getUnreadCount } from '../../api/notifications';
-import { getCurrentUser } from '../../api/users';
+import { useAuth } from '../../app/providers/AuthProvider';
 import Avatar from '../ui/Avatar';
 import Dropdown from '../ui/Dropdown';
 import Input from '../ui/Input';
@@ -31,18 +31,15 @@ export interface HeaderProps {
 
 export default function Header({ onOpenAuth }: HeaderProps) {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: getCurrentUser,
-  });
 
   const { data: unreadCount } = useQuery({
     queryKey: ['unreadNotifications'],
     queryFn: getUnreadCount,
     refetchInterval: 30000,
+    enabled: isAuthenticated,
   });
 
   const handleSearch = (e: React.FormEvent) => {
@@ -131,7 +128,7 @@ export default function Header({ onOpenAuth }: HeaderProps) {
             <MessageSquare className="w-5 h-5" />
           </Link>
 
-          {user ? (
+          {isAuthenticated && user ? (
             <Dropdown
               trigger={
                 <button className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors ml-2">

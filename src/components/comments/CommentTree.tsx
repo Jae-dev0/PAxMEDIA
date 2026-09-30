@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getComments, createComment } from '../../api/comments';
 import type { Comment } from '../../types';
+import { useAuth } from '../../app/providers/AuthProvider';
 import CommentComponent from './Comment';
 import Button from '../ui/Button';
 import Textarea from '../ui/Textarea';
@@ -9,6 +10,7 @@ import Select from '../ui/Select';
 import Skeleton from '../ui/Skeleton';
 import EmptyState from '../ui/EmptyState';
 import { MessageSquare } from 'lucide-react';
+import SignInPrompt from '../auth/SignInPrompt';
 
 export interface CommentTreeProps {
   postId: string;
@@ -17,6 +19,8 @@ export interface CommentTreeProps {
 export default function CommentTree({ postId }: CommentTreeProps) {
   const [sort, setSort] = useState('best');
   const [newComment, setNewComment] = useState('');
+  const [showSignInPrompt, setShowSignInPrompt] = useState(false);
+  const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
 
   const { data, isLoading, error, refetch } = useQuery({
@@ -33,10 +37,18 @@ export default function CommentTree({ postId }: CommentTreeProps) {
   });
 
   const handleReply = (_parentId: string, body: string) => {
+    if (!isAuthenticated) {
+      setShowSignInPrompt(true);
+      return;
+    }
     createMutation.mutate(body);
   };
 
   const handleSubmit = () => {
+    if (!isAuthenticated) {
+      setShowSignInPrompt(true);
+      return;
+    }
     if (newComment.trim()) {
       createMutation.mutate(newComment);
     }
@@ -70,7 +82,7 @@ export default function CommentTree({ postId }: CommentTreeProps) {
         <Textarea
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Add a comment..."
+          placeholder={isAuthenticated ? "Add a comment..." : "Sign in to comment..."}
           rows={3}
         />
         <div className="flex justify-end">
@@ -102,7 +114,7 @@ export default function CommentTree({ postId }: CommentTreeProps) {
         <EmptyState
           icon={<MessageSquare className="w-12 h-12" />}
           title="No comments yet"
-          description="Be the first to share your thoughts!"
+          description={isAuthenticated ? "Be the first to share your thoughts!" : "Sign in to be the first to comment!"}
         />
       ) : (
         <div className="divide-y divide-surface-100 dark:divide-surface-800">
@@ -111,6 +123,8 @@ export default function CommentTree({ postId }: CommentTreeProps) {
           ))}
         </div>
       )}
+
+      {showSignInPrompt && <SignInPrompt action="comment" onDismiss={() => setShowSignInPrompt(false)} />}
     </div>
   );
 }
