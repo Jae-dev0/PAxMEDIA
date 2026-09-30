@@ -28,7 +28,7 @@ export default function PostCard({ post, variant = 'full' }: PostCardProps) {
   const saveMutation = useMutation({
     mutationFn: () => savePost(post.id),
     onSuccess: (data) => {
-      toast('success', data.isSaved ? 'Post saved' : 'Post unsaved');
+      toast('success', data.is_saved ? 'Post saved' : 'Post unsaved');
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
   });
@@ -44,7 +44,7 @@ export default function PostCard({ post, variant = 'full' }: PostCardProps) {
   const repostMutation = useMutation({
     mutationFn: () => repostPost(post.id),
     onSuccess: (data) => {
-      toast('success', data.isReposted ? 'Post reposted' : 'Repost removed');
+      toast('success', data.is_reposted ? 'Post reposted' : 'Repost removed');
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
   });

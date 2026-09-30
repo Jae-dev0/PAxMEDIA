@@ -1,35 +1,19 @@
+import { api } from './client';
 import type { Notification, PaginatedResponse } from '../types';
-import { mockNotifications } from './mockData';
-
-/**
- * Notifications API - Mock implementation.
- */
 
 export async function getNotifications(page: number = 1, perPage: number = 20): Promise<PaginatedResponse<Notification>> {
-  await new Promise((r) => setTimeout(r, 200));
-  const start = (page - 1) * perPage;
-  const data = mockNotifications.slice(start, start + perPage);
-  return {
-    data,
-    total: mockNotifications.length,
-    page,
-    perPage,
-    hasMore: start + perPage < mockNotifications.length,
-  };
+  return api.get<PaginatedResponse<Notification>>('/notifications', { page, per_page: perPage });
 }
 
 export async function getUnreadCount(): Promise<number> {
-  await new Promise((r) => setTimeout(r, 100));
-  return mockNotifications.filter((n) => !n.isRead).length;
+  const response = await api.get<{ count: number }>('/notifications/unread-count');
+  return response.count;
 }
 
 export async function markAsRead(notificationId: string): Promise<void> {
-  await new Promise((r) => setTimeout(r, 100));
-  const notification = mockNotifications.find((n) => n.id === notificationId);
-  if (notification) notification.isRead = true;
+  return api.post<void>(`/notifications/${notificationId}/read`);
 }
 
 export async function markAllAsRead(): Promise<void> {
-  await new Promise((r) => setTimeout(r, 200));
-  mockNotifications.forEach((n) => (n.isRead = true));
+  return api.post<void>('/notifications/read-all');
 }

@@ -1,0 +1,50 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getCurrentUser, login as loginApi, register as registerApi, logout as logoutApi } from '../api/auth';
+
+export function useCurrentUser() {
+  return useQuery({
+    queryKey: ['currentUser'],
+    queryFn: getCurrentUser,
+    retry: false,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function useLogin() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ email, password }: { email: string; password: string }) =>
+      loginApi(email, password),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['currentUser'], data.user);
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+    },
+  });
+}
+
+export function useRegister() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      username: string;
+      email: string;
+      password: string;
+      password_confirmation: string;
+      display_name: string;
+    }) => registerApi(data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['currentUser'], data.user);
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+    },
+  });
+}
+
+export function useLogout() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: logoutApi,
+    onSuccess: () => {
+      queryClient.clear();
+    },
+  });
+}

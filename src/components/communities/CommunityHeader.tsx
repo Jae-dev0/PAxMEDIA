@@ -18,7 +18,7 @@ export default function CommunityHeader({ community }: CommunityHeaderProps) {
   const joinMutation = useMutation({
     mutationFn: () => joinCommunity(community.id),
     onSuccess: (data) => {
-      toast('success', data.isJoined ? `Joined ${community.name}` : `Left ${community.name}`);
+      toast('success', data.is_joined ? `Joined ${community.name}` : `Left ${community.name}`);
       queryClient.invalidateQueries({ queryKey: ['community', community.slug] });
     },
   });
@@ -26,7 +26,7 @@ export default function CommunityHeader({ community }: CommunityHeaderProps) {
   const followMutation = useMutation({
     mutationFn: () => followCommunity(community.id),
     onSuccess: (data) => {
-      toast('success', data.isFollowing ? `Following ${community.name}` : `Unfollowed ${community.name}`);
+      toast('success', data.is_following ? `Following ${community.name}` : `Unfollowed ${community.name}`);
       queryClient.invalidateQueries({ queryKey: ['community', community.slug] });
     },
   });

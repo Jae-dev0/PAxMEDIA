@@ -1,53 +1,110 @@
 /**
- * API Client - Abstraction layer for future Laravel backend integration.
- *
- * Currently uses mock data with simulated network delays.
- * Replace the mock implementations with real HTTP calls when the
- * Laravel API is ready.
+ * API Client - HTTP client for Laravel backend communication.
+ * Uses fetch with automatic token injection and error handling.
  */
 
-const SIMULATED_DELAY = 300;
-
-function delay(ms: number = SIMULATED_DELAY): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 export class ApiError extends Error {
   status: number;
+  data: unknown;
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, data?: unknown) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
+    this.data = data;
   }
 }
 
+function getToken(): string | null {
+  return localStorage.getItem('paxmedia_token');
+}
+
+function setToken(token: string | null) {
+  if (token) {
+    localStorage.setItem('paxmedia_token', token);
+  } else {
+    localStorage.removeItem('paxmedia_token');
+  }
+}
+
+export { getToken, setToken };
+
+interface RequestOptions {
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  body?: unknown;
+  headers?: Record<string, string>;
+  params?: Record<string, string | number | undefined>;
+}
+
+export async function apiRequest<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+  const { method = 'GET', body, headers = {}, params } = options;
+
+  // Build URL with query params
+  let url = `${API_BASE_URL}${endpoint}`;
+  if (params) {
+    const searchParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined) searchParams.append(key, String(value));
+    });
+    const queryString = searchParams.toString();
+    if (queryString) url += `?${queryString}`;
+  }
+
+  // Build headers
+  const requestHeaders: Record<string, string> = {
+    'Accept': 'application/json',
+    ...headers,
+  };
+
+  // Add auth token if available
+  const token = getToken();
+  if (token) {
+    requestHeaders['Authorization'] = `Bearer ${token}`;
+  }
+
+  // Add content type for non-GET requests
+  if (method !== 'GET' && body) {
+    requestHeaders['Content-Type'] = 'application/json';
+  }
+
+  const config: RequestInit = {
+    method,
+    headers: requestHeaders,
+  };
+
+  if (body && method !== 'GET') {
+    config.body = JSON.stringify(body);
+  }
+
+  const response = await fetch(url, config);
+
+  // Handle empty responses
+  if (response.status === 204) {
+    return {} as T;
+  }
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message = data?.message || `Request failed with status ${response.status}`;
+    throw new ApiError(response.status, message, data);
+  }
+
+  return data as T;
+}
+
 export const api = {
-  async get<T>(url: string, params?: Record<string, unknown>): Promise<T> {
-    await delay();
-    // In production: return fetch(`/api${url}?${new URLSearchParams(params)}`).then(r => r.json())
-    void url;
-    void params;
-    throw new ApiError(501, 'Not implemented - use mock API functions');
-  },
+  get: <T>(endpoint: string, params?: Record<string, string | number | undefined>) =>
+    apiRequest<T>(endpoint, { method: 'GET', params }),
 
-  async post<T>(url: string, body?: unknown): Promise<T> {
-    await delay();
-    void url;
-    void body;
-    throw new ApiError(501, 'Not implemented - use mock API functions');
-  },
+  post: <T>(endpoint: string, body?: unknown) =>
+    apiRequest<T>(endpoint, { method: 'POST', body }),
 
-  async put<T>(url: string, body?: unknown): Promise<T> {
-    await delay();
-    void url;
-    void body;
-    throw new ApiError(501, 'Not implemented - use mock API functions');
-  },
+  put: <T>(endpoint: string, body?: unknown) =>
+    apiRequest<T>(endpoint, { method: 'PUT', body }),
 
-  async delete<T>(url: string): Promise<T> {
-    await delay();
-    void url;
-    throw new ApiError(501, 'Not implemented - use mock API functions');
-  },
+  delete: <T>(endpoint: string) =>
+    apiRequest<T>(endpoint, { method: 'DELETE' }),
 };

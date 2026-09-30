@@ -24,7 +24,7 @@ export default function CommunitiesPage() {
     mutationFn: (id: string) => joinCommunity(id),
     onSuccess: (data, id) => {
       const community = communities?.data.find((c) => c.id === id);
-      toast('success', data.isJoined ? `Joined ${community?.name}` : `Left ${community?.name}`);
+      toast('success', data.is_joined ? `Joined ${community?.name}` : `Left ${community?.name}`);
       queryClient.invalidateQueries({ queryKey: ['communities'] });
     },
   });

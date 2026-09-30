@@ -6,6 +6,7 @@ import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Checkbox from '../ui/Checkbox';
 import Modal from '../ui/Modal';
+import { useLogin, useRegister } from '../../hooks/useAuth';
 
 type AuthView = 'login' | 'register';
 
@@ -22,15 +23,19 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }: Au
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string; username?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; username?: string; displayName?: string }>({});
+
+  const loginMutation = useLogin();
+  const registerMutation = useRegister();
 
   const resetForm = () => {
     setEmail('');
     setPassword('');
     setUsername('');
+    setDisplayName('');
     setShowPassword(false);
     setRememberMe(false);
     setErrors({});
@@ -45,6 +50,9 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }: Au
     const newErrors: Record<string, string> = {};
     if (view === 'register' && !username) {
       newErrors.username = 'Username is required';
+    }
+    if (view === 'register' && !displayName) {
+      newErrors.displayName = 'Display name is required';
     }
     if (!email) {
       newErrors.email = 'Email is required';
@@ -63,18 +71,43 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }: Au
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setIsLoading(false);
-    toast('success', view === 'login' ? 'Welcome back to PAxMEDIA!' : 'Account created successfully!');
-    resetForm();
-    onClose();
-    navigate('/');
+
+    try {
+      if (view === 'login') {
+        await loginMutation.mutateAsync({ email, password });
+        toast('success', 'Welcome back to PAxMEDIA!');
+      } else {
+        await registerMutation.mutateAsync({
+          username,
+          email,
+          password,
+          password_confirmation: password,
+          display_name: displayName,
+        });
+        toast('success', 'Account created successfully!');
+      }
+      resetForm();
+      onClose();
+      navigate('/');
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } };
+      if (err.response?.data?.errors) {
+        const apiErrors: Record<string, string> = {};
+        Object.entries(err.response.data.errors).forEach(([key, value]) => {
+          apiErrors[key] = Array.isArray(value) ? value[0] : value;
+        });
+        setErrors(apiErrors);
+      } else {
+        toast('error', err.response?.data?.message || 'An error occurred. Please try again.');
+      }
+    }
   };
 
   const handleSocialLogin = (provider: string) => {
     toast('info', `${provider} login coming soon!`);
   };
+
+  const isLoading = loginMutation.isPending || registerMutation.isPending;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="md" showClose>
@@ -125,16 +158,27 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }: Au
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {view === 'register' && (
-            <Input
-              label="Username"
-              type="text"
-              value={username}
-              onChange={(e) => { setUsername(e.target.value); setErrors((prev) => ({ ...prev, username: undefined })); }}
-              placeholder="Choose a username"
-              icon={<User className="w-4 h-4" />}
-              error={errors.username}
-              required
-            />
+            <>
+              <Input
+                label="Username"
+                type="text"
+                value={username}
+                onChange={(e) => { setUsername(e.target.value); setErrors((prev) => ({ ...prev, username: undefined })); }}
+                placeholder="Choose a username"
+                icon={<User className="w-4 h-4" />}
+                error={errors.username}
+                required
+              />
+              <Input
+                label="Display Name"
+                type="text"
+                value={displayName}
+                onChange={(e) => { setDisplayName(e.target.value); setErrors((prev) => ({ ...prev, displayName: undefined })); }}
+                placeholder="Your display name"
+                error={errors.displayName}
+                required
+              />
+            </>
           )}
 
           <Input

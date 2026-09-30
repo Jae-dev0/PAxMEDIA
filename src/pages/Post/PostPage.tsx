@@ -49,7 +49,7 @@ export default function PostPage() {
   const saveMutation = useMutation({
     mutationFn: () => savePost(id!),
     onSuccess: (data) => {
-      toast('success', data.isSaved ? 'Post saved' : 'Post unsaved');
+      toast('success', data.is_saved ? 'Post saved' : 'Post unsaved');
       queryClient.invalidateQueries({ queryKey: ['post', id] });
     },
   });
