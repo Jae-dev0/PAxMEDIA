@@ -7,6 +7,7 @@ import Input from '../ui/Input';
 import Checkbox from '../ui/Checkbox';
 import Modal from '../ui/Modal';
 import { useLogin, useRegister } from '../../hooks/useAuth';
+import { ApiError } from '../../api/client';
 
 type AuthView = 'login' | 'register';
 
@@ -90,15 +91,24 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }: Au
       onClose();
       navigate('/');
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } };
-      if (err.response?.data?.errors) {
+      // The API client throws ApiError, which carries the parsed payload on
+      // `.data`. Reading `.response.data` (an axios-ism) silently fell through
+      // to the generic message, hiding real errors like "email has already
+      // been taken" or a 419 CSRF failure.
+      const err = error as ApiError;
+      const payload = err?.data as
+        | { message?: string; errors?: Record<string, string | string[]> }
+        | undefined;
+
+      if (payload?.errors) {
         const apiErrors: Record<string, string> = {};
-        Object.entries(err.response.data.errors).forEach(([key, value]) => {
-          apiErrors[key] = Array.isArray(value) ? value[0] : value;
+        Object.entries(payload.errors).forEach(([key, value]) => {
+          const field = key === 'display_name' ? 'displayName' : key;
+          apiErrors[field] = Array.isArray(value) ? value[0] : String(value);
         });
         setErrors(apiErrors);
       } else {
-        toast('error', err.response?.data?.message || 'An error occurred. Please try again.');
+        toast('error', payload?.message || err?.message || 'An error occurred. Please try again.');
       }
     }
   };

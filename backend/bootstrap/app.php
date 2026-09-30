@@ -12,9 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->api(prepend: [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-        ]);
+        // NOTE: Sanctum's EnsureFrontendRequestsAreStateful is deliberately NOT
+        // enabled. It switches browser requests (Referer/Origin on a stateful
+        // domain) into cookie-based "web" session mode, which pulls in CSRF
+        // validation and makes every write fail with HTTP 419. This frontend
+        // authenticates with a Bearer token in localStorage, so stateless
+        // token auth is the correct model here.
 
         // This is an API-only app with no HTML login page. Returning null makes
         // the auth middleware emit a 401 JSON response instead of trying to

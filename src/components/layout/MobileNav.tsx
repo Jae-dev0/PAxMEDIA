@@ -3,7 +3,7 @@ import { Home, Compass, Plus, Bell, User } from 'lucide-react';
 import { cn } from '../../utils/format';
 import { useQuery } from '@tanstack/react-query';
 import { getUnreadCount } from '../../api/notifications';
-import { getCurrentUser } from '../../api/users';
+import { useAuth } from '../../app/providers/AuthProvider';
 import Avatar from '../ui/Avatar';
 
 const navItems = [
@@ -14,15 +14,16 @@ const navItems = [
 ];
 
 export default function MobileNav() {
+  // Reuse AuthProvider's user instead of firing a second /auth/me request.
+  const { user, isAuthenticated } = useAuth();
+
   const { data: unreadCount } = useQuery({
     queryKey: ['unreadNotifications'],
     queryFn: getUnreadCount,
     refetchInterval: 30000,
-  });
-
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: getCurrentUser,
+    // Guests must not hit this endpoint, or it 401s on every page load.
+    enabled: isAuthenticated,
+    retry: false,
   });
 
   return (
@@ -51,7 +52,7 @@ export default function MobileNav() {
           </NavLink>
         ))}
         <NavLink
-          to={user ? `/user/${user.username}` : '/login'}
+          to={user ? `/user/${user.username}` : '/'}
           className={({ isActive }) =>
             cn(
               'flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors',

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getUser, getUsers, getRisingCreators, getCurrentUser } from '../api/users';
+import { getUser, getUsers, getRisingCreators } from '../api/users';
 
 export function useUser(username: string) {
   return useQuery({
@@ -23,10 +23,3 @@ export function useRisingCreators(limit: number = 5) {
   });
 }
 
-export function useCurrentUser() {
-  return useQuery({
-    queryKey: ['currentUser'],
-    queryFn: getCurrentUser,
-    retry: false,
-  });
-}

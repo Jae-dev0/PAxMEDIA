@@ -1,13 +1,15 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getCurrentUser, login as loginApi, register as registerApi, logout as logoutApi } from '../api/auth';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { login as loginApi, register as registerApi, logout as logoutApi } from '../api/auth';
+import { useAuth } from '../app/providers/AuthProvider';
 
+/**
+ * Current-user state is owned by AuthProvider, which only calls /auth/me when a
+ * token exists. This hook reads that shared state rather than firing its own
+ * request, so guests never trigger a 401 on every render.
+ */
 export function useCurrentUser() {
-  return useQuery({
-    queryKey: ['currentUser'],
-    queryFn: getCurrentUser,
-    retry: false,
-    staleTime: 1000 * 60 * 5,
-  });
+  const { user, isLoading } = useAuth();
+  return { data: user, isLoading };
 }
 
 export function useLogin() {

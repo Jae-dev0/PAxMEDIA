@@ -88,6 +88,14 @@ export async function apiRequest<T>(endpoint: string, options: RequestOptions = 
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
+    // A rejected token (expired, or the database was reset) would otherwise
+    // 401 on every subsequent request. Drop it so the app falls back to guest
+    // browsing instead of cascading errors across every page.
+    if (response.status === 401 && getToken()) {
+      setToken(null);
+      window.dispatchEvent(new Event('paxmedia:unauthorized'));
+    }
+
     const message = data?.message || `Request failed with status ${response.status}`;
     throw new ApiError(response.status, message, data);
   }

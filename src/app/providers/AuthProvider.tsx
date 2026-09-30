@@ -41,6 +41,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // The API client broadcasts this when it discards a rejected token, so the
+  // UI drops back to guest state instead of showing stale authenticated chrome.
+  useEffect(() => {
+    const handleUnauthorized = () => setUser(null);
+    window.addEventListener('paxmedia:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('paxmedia:unauthorized', handleUnauthorized);
+  }, []);
+
   const login = async (email: string, password: string) => {
     const { login: loginApi } = await import('../../api/auth');
     const response = await loginApi(email, password);
