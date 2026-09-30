@@ -4,7 +4,7 @@ import { useToast } from '../../components/ui/Toast';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Checkbox from '../../components/ui/Checkbox';
-import { Mail, Lock, Eye, EyeOff, Globe, Code2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Globe, Code2, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -49,76 +49,129 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 p-12 flex-col justify-between relative overflow-hidden">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl" />
+      <div className="hidden lg:flex lg:w-[55%] bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 p-12 flex-col justify-between relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-white/5 rounded-full translate-y-1/2 -translate-x-1/3" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/3 rounded-full" />
         </div>
 
+        {/* Grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)',
+          backgroundSize: '60px 60px'
+        }} />
+
+        {/* Logo */}
         <div className="relative z-10">
-          <Link to="/" className="flex items-center gap-3">
-            <img src="/logo.png" alt="PAxMEDIA" className="h-10 w-auto brightness-0 invert" />
+          <Link to="/" className="inline-flex items-center gap-3 group">
+            <div className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
+              <span className="text-white font-bold text-lg">P</span>
+            </div>
+            <span className="font-display font-bold text-xl text-white tracking-tight">
+              PAxMEDIA
+            </span>
           </Link>
         </div>
 
-        <div className="relative z-10 space-y-6">
-          <h1 className="text-4xl font-bold text-white leading-tight">
-            Welcome to the<br />community that<br />never stops talking.
-          </h1>
-          <p className="text-brand-100 text-lg max-w-md">
-            Join millions of users discussing topics they love. Share your thoughts, discover new communities, and connect with people who share your interests.
-          </p>
-          <div className="flex items-center gap-4 pt-4">
-            <div className="flex -space-x-3">
-              {['https://api.dicebear.com/7.x/avataaars/svg?seed=1', 'https://api.dicebear.com/7.x/avataaars/svg?seed=2', 'https://api.dicebear.com/7.x/avataaars/svg?seed=3', 'https://api.dicebear.com/7.x/avataaars/svg?seed=4'].map((src, i) => (
-                <img key={i} src={src} alt="User" className="w-10 h-10 rounded-full border-2 border-white" />
-              ))}
-            </div>
-            <p className="text-brand-100 text-sm">
-              <span className="font-semibold text-white">2.4M+</span> members already joined
+        {/* Main content */}
+        <div className="relative z-10 space-y-8 max-w-lg">
+          <div className="space-y-4">
+            <h1 className="text-5xl font-bold text-white leading-[1.1] tracking-tight">
+              Where communities come alive.
+            </h1>
+            <p className="text-brand-100/80 text-lg leading-relaxed">
+              Join millions of users discussing topics they love. Share your thoughts, discover new communities, and connect with people who share your interests.
             </p>
+          </div>
+
+          {/* Stats */}
+          <div className="flex items-center gap-8 pt-4">
+            <div>
+              <p className="text-3xl font-bold text-white">2.4M+</p>
+              <p className="text-brand-200/70 text-sm">Active members</p>
+            </div>
+            <div className="w-px h-12 bg-white/20" />
+            <div>
+              <p className="text-3xl font-bold text-white">8.2K</p>
+              <p className="text-brand-200/70 text-sm">Communities</p>
+            </div>
+            <div className="w-px h-12 bg-white/20" />
+            <div>
+              <p className="text-3xl font-bold text-white">156K</p>
+              <p className="text-brand-200/70 text-sm">Daily posts</p>
+            </div>
+          </div>
+
+          {/* Testimonial */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/10">
+            <p className="text-white/90 text-sm leading-relaxed italic">
+              "PAxMEDIA has become my go-to platform for discovering new communities. The discussions are engaging and the people are amazing."
+            </p>
+            <div className="flex items-center gap-3 mt-4">
+              <img
+                src="https://api.dicebear.com/7.x/avataaars/svg?seed=sarah"
+                alt="User"
+                className="w-8 h-8 rounded-full bg-white/20"
+              />
+              <div>
+                <p className="text-white text-sm font-medium">Sarah Miller</p>
+                <p className="text-brand-200/60 text-xs">Community Moderator</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="relative z-10">
-          <p className="text-brand-200 text-sm">
+        {/* Footer */}
+        <div className="relative z-10 flex items-center justify-between">
+          <p className="text-brand-200/50 text-sm">
             &copy; 2026 PAxMEDIA. All rights reserved.
           </p>
+          <div className="flex items-center gap-4">
+            <a href="#" className="text-brand-200/50 hover:text-white text-sm transition-colors">Privacy</a>
+            <a href="#" className="text-brand-200/50 hover:text-white text-sm transition-colors">Terms</a>
+            <a href="#" className="text-brand-200/50 hover:text-white text-sm transition-colors">Help</a>
+          </div>
         </div>
       </div>
 
       {/* Right side - Login form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
-        <div className="w-full max-w-md space-y-8">
+      <div className="w-full lg:w-[45%] flex items-center justify-center p-6 sm:p-12 bg-white dark:bg-surface-950">
+        <div className="w-full max-w-sm space-y-8">
           {/* Mobile logo */}
           <div className="lg:hidden text-center">
-            <Link to="/" className="inline-block">
-              <img src="/logo.png" alt="PAxMEDIA" className="h-10 w-auto mx-auto" />
+            <Link to="/" className="inline-flex items-center gap-2">
+              <div className="w-9 h-9 bg-brand-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold">P</span>
+              </div>
+              <span className="font-display font-bold text-lg text-surface-900 dark:text-surface-100">
+                PAxMEDIA
+              </span>
             </Link>
           </div>
 
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-surface-900 dark:text-surface-100">Sign in</h2>
-            <p className="text-surface-500 dark:text-surface-400">
+          <div className="space-y-1.5">
+            <h2 className="text-2xl font-bold text-surface-900 dark:text-surface-100 tracking-tight">Sign in</h2>
+            <p className="text-surface-500 dark:text-surface-400 text-sm">
               Enter your credentials to access your account
             </p>
           </div>
 
           {/* Social login */}
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <button
               onClick={() => handleSocialLogin('Google')}
-              className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-surface-300 dark:border-surface-600 rounded-lg text-sm font-medium text-surface-700 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors"
+              className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-surface-200 dark:border-surface-700 rounded-xl text-sm font-medium text-surface-700 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-800/50 hover:border-surface-300 dark:hover:border-surface-600 transition-all duration-200"
             >
-              <Globe className="w-5 h-5" />
+              <Globe className="w-4 h-4 text-surface-500" />
               Continue with Google
             </button>
             <button
               onClick={() => handleSocialLogin('GitHub')}
-              className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-surface-300 dark:border-surface-600 rounded-lg text-sm font-medium text-surface-700 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors"
+              className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-surface-200 dark:border-surface-700 rounded-xl text-sm font-medium text-surface-700 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-800/50 hover:border-surface-300 dark:hover:border-surface-600 transition-all duration-200"
             >
-              <Code2 className="w-5 h-5" />
+              <Code2 className="w-4 h-4 text-surface-500" />
               Continue with GitHub
             </button>
           </div>
@@ -128,8 +181,8 @@ export default function LoginPage() {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-surface-200 dark:border-surface-700" />
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white dark:bg-surface-950 text-surface-500">or continue with email</span>
+            <div className="relative flex justify-center text-xs">
+              <span className="px-3 bg-white dark:bg-surface-950 text-surface-400 uppercase tracking-wider">or</span>
             </div>
           </div>
 
@@ -160,36 +213,44 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-[38px] text-surface-400 hover:text-surface-600 dark:hover:text-surface-200"
+                className="absolute right-3 top-[38px] text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 transition-colors"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pt-1">
               <Checkbox
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
                 label="Remember me"
               />
-              <Link to="/forgot-password" className="text-sm text-brand-600 hover:underline">
+              <Link to="/forgot-password" className="text-sm text-brand-600 hover:text-brand-700 font-medium transition-colors">
                 Forgot password?
               </Link>
             </div>
 
             <Button type="submit" className="w-full" isLoading={isLoading}>
-              Sign In
+              {isLoading ? 'Signing in...' : 'Sign In'}
+              {!isLoading && <ArrowRight className="w-4 h-4 ml-2" />}
             </Button>
           </form>
 
           {/* Sign up link */}
           <p className="text-center text-sm text-surface-500 dark:text-surface-400">
             Don't have an account?{' '}
-            <Link to="/register" className="text-brand-600 hover:underline font-medium">
+            <Link to="/register" className="text-brand-600 hover:text-brand-700 font-medium transition-colors">
               Create one
             </Link>
           </p>
+
+          {/* Mobile footer */}
+          <div className="lg:hidden pt-4 border-t border-surface-200 dark:border-surface-700">
+            <p className="text-center text-xs text-surface-400">
+              &copy; 2026 PAxMEDIA. All rights reserved.
+            </p>
+          </div>
         </div>
       </div>
     </div>
