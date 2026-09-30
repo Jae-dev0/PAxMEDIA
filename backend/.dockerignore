@@ -30,10 +30,11 @@ yarn-error.log*
 dist
 build
 
-# Docker
+# Docker (only exclude root-level docker files, not backend/docker/)
 docker-compose.yml
+docker-compose.dev.yml
 Dockerfile
-docker/
+.dockerignore
 
 # Testing
 .phpunit.result.cache
