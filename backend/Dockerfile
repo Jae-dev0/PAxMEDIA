@@ -35,8 +35,9 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
 COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
-# Configure Nginx
-COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+# Configure Nginx (http.d is inside the http block where server directives are allowed)
+RUN mkdir -p /etc/nginx/http.d
+COPY docker/nginx/default.conf /etc/nginx/http.d/default.conf
 
 # Configure Supervisor
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
