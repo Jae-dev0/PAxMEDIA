@@ -41,6 +41,9 @@ COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 # Configure Supervisor
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Create required directories
+RUN mkdir -p /var/log/supervisor /var/log/php /var/log/nginx /var/run
+
 WORKDIR /var/www/html
 
 # Copy application
