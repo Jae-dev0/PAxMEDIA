@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import Layout from '../components/layout/Layout';
 import Spinner from '../components/ui/Spinner';
@@ -18,9 +18,6 @@ const SearchPage = lazy(() => import('../pages/Search/SearchPage'));
 const SettingsPage = lazy(() => import('../pages/Settings/SettingsPage'));
 const ModerationPage = lazy(() => import('../pages/Moderation/ModerationPage'));
 const AdminPage = lazy(() => import('../pages/Admin/AdminPage'));
-const LoginPage = lazy(() => import('../pages/Auth/LoginPage'));
-const RegisterPage = lazy(() => import('../pages/Auth/RegisterPage'));
-const ForgotPasswordPage = lazy(() => import('../pages/Auth/ForgotPasswordPage'));
 
 function PageLoader() {
   return (
@@ -49,19 +46,13 @@ const router = createBrowserRouter([
       { path: 'settings', element: <Suspense fallback={<PageLoader />}><SettingsPage /></Suspense> },
       { path: 'moderation', element: <Suspense fallback={<PageLoader />}><ModerationPage /></Suspense> },
       { path: 'admin', element: <Suspense fallback={<PageLoader />}><AdminPage /></Suspense> },
+      // Auth routes redirect to home (modal handles auth)
+      { path: 'login', element: <Navigate to="/" replace /> },
+      { path: 'register', element: <Navigate to="/" replace /> },
+      { path: 'forgot-password', element: <Navigate to="/" replace /> },
+      // Catch all
+      { path: '*', element: <Navigate to="/" replace /> },
     ],
-  },
-  {
-    path: '/login',
-    element: <Suspense fallback={<PageLoader />}><LoginPage /></Suspense>,
-  },
-  {
-    path: '/register',
-    element: <Suspense fallback={<PageLoader />}><RegisterPage /></Suspense>,
-  },
-  {
-    path: '/forgot-password',
-    element: <Suspense fallback={<PageLoader />}><ForgotPasswordPage /></Suspense>,
   },
 ]);
 

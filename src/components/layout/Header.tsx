@@ -23,9 +23,13 @@ import { getCurrentUser } from '../../api/users';
 import Avatar from '../ui/Avatar';
 import Dropdown from '../ui/Dropdown';
 import Input from '../ui/Input';
+import Button from '../ui/Button';
 
+export interface HeaderProps {
+  onOpenAuth: () => void;
+}
 
-export default function Header() {
+export default function Header({ onOpenAuth }: HeaderProps) {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -127,7 +131,7 @@ export default function Header() {
             <MessageSquare className="w-5 h-5" />
           </Link>
 
-          {user && (
+          {user ? (
             <Dropdown
               trigger={
                 <button className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors ml-2">
@@ -137,6 +141,15 @@ export default function Header() {
               }
               items={userMenuItems}
             />
+          ) : (
+            <div className="flex items-center gap-2 ml-2">
+              <Button variant="ghost" size="sm" onClick={onOpenAuth}>
+                Sign In
+              </Button>
+              <Button variant="primary" size="sm" onClick={onOpenAuth}>
+                Open Account
+              </Button>
+            </div>
           )}
         </nav>
 
@@ -182,6 +195,11 @@ export default function Header() {
                 </Link>
               ))}
             </nav>
+            <div className="pt-3 border-t border-surface-200 dark:border-surface-700">
+              <Button variant="primary" className="w-full" onClick={() => { setIsMobileMenuOpen(false); onOpenAuth(); }}>
+                Sign In
+              </Button>
+            </div>
           </div>
         </div>
       )}
